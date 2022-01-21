@@ -1,19 +1,18 @@
 
-
+## Load packages
 library(readxl)
 library(tidyr)
 library(plyr, warn.conflicts = FALSE)
 library(tidyverse, warn.conflicts = FALSE)
 
-###
+##
 
 ## Set working directory
 setwd("~/Documents/modelling/Energy Modelling/cleaning_energy_balance") # Note: this will be different on your computer
 
 
-##
-
-# Input other data that will be used to process the energy balance
+## Input other data that will be used to process the energy balance
+# flow data
 df_oed_flow <- readxl::read_xlsx("other_energy_data.xlsx",
                                  sheet = "flow",
                                  col_names = T) %>% 
@@ -21,18 +20,15 @@ df_oed_flow <- readxl::read_xlsx("other_energy_data.xlsx",
 
 df_oed_flow
 
-# length(sort(unique(df_oed_flow$Flow)))
-
-
+# product data
 df_oed_prod <- readxl::read_xlsx("other_energy_data.xlsx",
                                  sheet = "product",
                                  col_names = T) %>%
   dplyr::distinct()
 
 df_oed_prod
-# 
-# length(sort(unique(df_oed_prod$Flow)))
 
+# conversion factors data
 df_conv_factors <- readxl::read_xlsx("other_energy_data.xlsx",
                                      sheet = "conversion_factors",
                                      col_names = T) %>%
@@ -43,14 +39,13 @@ df_conv_factors
 
 
 ## Paths to the location of raw data
-esnon_file <- "./raw_eb_data/Zambia_Energy_Balances_esnon.xlsx"
-eeb_file <- "./raw_eb_data/Zambia_ExtendedEB_1990-.csv"
+esnon_file <- "./raw_eb_data/Zambia_Energy_Balances_esnon.xlsx" # esnon data
+eeb_file <- "./raw_eb_data/Zambia_ExtendedEB_1990-.csv" # eeb data
 
 
-# Input the raw data from esnon
+## Input the raw data from esnon
 
-
-#
+# Extract the observation's unit
 get_unit_esnon <- function(InputData){
   
   listVal <- InputData
@@ -73,7 +68,7 @@ get_unit_esnon <- function(InputData){
   
 }
 
-# 
+# add variables to the raw data
 get_processed_esnon_data <- function(InputData){
   
   dataVal <- InputData
@@ -103,12 +98,7 @@ get_processed_esnon_data <- function(InputData){
   
 }
 
-
-# df_esnon2 <- get_processed_esnon_data(df)
-# df_esnon2
-
-
-# Combine the data into one dataframe
+# Combine the all the esnon data into one dataframe
 combine_esnon_data <- function(InputDataPath){
   
   dataVal_flow <- df_oed_flow %>% 
@@ -148,141 +138,8 @@ df_esnon <- combine_esnon_data(esnon_file)
 df_esnon
 
 
-
-# length(unique(df_esnon$PRODUCT))
-# length(unique(df_oed_flow$flow_esnon))
-# 
-# 
-# dfx1 <- df_oed_flow %>% 
-#   filter(!is.na(flow_esnon))
-# 
-# 
-# df_esnon$PRODUCT == dfx1$flow_esnon
-# 
-# df <- df_esnon %>% 
-#   tidyr::gather("Product", "value", -PRODUCT, -source, -year, -flow_index)
-#   
-# df
-
-
-
-#Input the raw data
-# df_eeb <- read_csv(eeb_file,
-#                    show_col_types = FALSE,
-#                    col_names = T) %>%
-#   dplyr::mutate(source = "eeb") # Include the source of the data
-# 
-# df_eeb
-# 
-# 
-# unique(df_eeb$'Flag Codes')
-# unique(df_eeb$Unit)
-# 
-# length(sort(unique(df_eeb$Product))) == length(sort(unique(df_eeb$Flow)))
-
-
-## get the names of the products in the dataset
-# df_raw %>% 
-#   dplyr::select(PRODUCT, Product) %>% 
-#   dplyr::distinct() -> df_prod
-# 
-# write.csv(df_prod, 'eb_products.csv', row.names = F)
-
-
-## get the names of the flow in the dataset
-# df_raw %>%
-#   dplyr::select(FLOW, Flow) %>%
-#   dplyr::distinct() -> df_flow
-# 
-# write.csv(df_flow, 'eb_flow.csv', row.names = F)
-
-# 
-# # Input other data that will be used to process the energy balance
-# df_oed_flow <- readxl::read_xlsx("other_energy_data.xlsx",
-#                              sheet = "flow",
-#                              col_names = T) %>% 
-#   dplyr::distinct()
-# 
-# df_oed_flow
-# 
-# # length(sort(unique(df_oed_flow$Flow)))
-# 
-# 
-# df_oed_prod <- readxl::read_xlsx("other_energy_data.xlsx",
-#                              sheet = "product",
-#                              col_names = T) %>%
-#   dplyr::distinct()
-# 
-# df_oed_prod
-# # 
-# # length(sort(unique(df_oed_prod$Flow)))
-
-
-
-
-# ##
-# 
-# get_unit_esnon <- function(InputData){
-#   
-#   listVal <- InputData
-#   
-#   if(str_detect(listVal, "\\(kt\\)") == T){
-#     "kt"
-#   } else if(str_detect(listVal, "\\(TJ\\)") == T){
-#     "TJ"
-#   } else   if(str_detect(listVal, "\\(GWh\\)") == T){
-#     "GWh"
-#   } else if(str_detect(listVal, "\\(TJ-net\\)") == T){
-#     "TJ net"
-#   } else if(str_detect(listVal, "\\(TJ-gross\\)") == T){
-#     "TJ gross"
-#   } else if(str_detect(listVal, "\\(direct use in TJ-net\\)") == T){
-#     "TJ net"
-#   } else {
-#     ""
-#   }
-#   
-# }
-# 
-# get_processed_esnon_data <- function(InputData){
-#   
-#   dataVal <- InputData
-#   
-#   dataVal$product <- plyr::mapvalues(dataVal$Product,
-#                                      from = df_oed_prod$product_esnon,
-#                                      to = df_oed_prod$product_common)
-#   
-#   dataVal$flow <- plyr::mapvalues(dataVal$flow_index,
-#                                   from = df_oed_flow$flow_esnon_eeb_index,
-#                                   to = df_oed_flow$flow_common)
-#   
-#   dataVal$stage <- plyr::mapvalues(dataVal$flow_index,
-#                                    from = df_oed_flow$flow_esnon_eeb_index,
-#                                    to = df_oed_flow$Category2)
-#   
-#   listVal <- dataVal$Product
-#   listVal2 <- listVal[!is.na(listVal)]
-# 
-#   listVal = as.character(lapply(listVal2, get_unit_esnon))
-#   
-#   dataVal2 <- as_tibble(dataVal)  %>% 
-#     dplyr::bind_cols(unit = listVal) %>%
-#     dplyr::select(source, product, flow, stage, unit, year, value) # %>%
-#     # tidyr::spread(key = year, value = value)
-# 
-#   
-# }
-# 
-# 
-# df_esnon2 <- get_processed_esnon_data(df)
-# df_esnon2
-# 
-# 
-# ##
-
-
-
-get_processed_eeb_data <- function(InputData){ #, InputYear1, InputYear2
+## Input the raw data from eeb
+get_processed_eeb_data <- function(InputData){
   
   dataVal <- InputData
   
@@ -291,16 +148,10 @@ get_processed_eeb_data <- function(InputData){ #, InputYear1, InputYear2
                      col_names = T) %>%
     dplyr::mutate(source = "eeb") # Include the source of the data
   
-  # df_eeb
-  #
-  # print(dim(dataVal))
-  
   dataVal$product <- plyr::mapvalues(dataVal$Product,
                                      from = df_oed_prod$products_eeb2,
                                      to = df_oed_prod$product_common)
   
-  # print(dim(dataVal))
-  #
   dataVal$flow <- plyr::mapvalues(dataVal$Flow,
                                   from = df_oed_flow$flow_eeb2,
                                   to = df_oed_flow$flow_common)
@@ -309,21 +160,13 @@ get_processed_eeb_data <- function(InputData){ #, InputYear1, InputYear2
                                    from = df_oed_flow$flow_eeb2,
                                    to = df_oed_flow$Category2)
   
-  # print(dim(dataVal))
-  #  
   dataVal2 <- as_tibble(dataVal)
-  # rm(dataVal)
   
   dataVal <- dataVal2 %>%
     dplyr::rename(year = Time,
                   unit = Unit,
                   value = Value) %>%
-    dplyr::select(source, product, flow, stage, unit, year, value) #%>%
-    # dplyr::filter(year >= InputYear1 & year <= InputYear2,
-    #               # Flow == "Production"
-    # ) #%>%
-    # tidyr::spread(key = year, value = value) %>%
-    # as_tibble()
+    dplyr::select(source, product, flow, stage, unit, year, value)
   
 }
 
@@ -331,35 +174,19 @@ get_processed_eeb_data <- function(InputData){ #, InputYear1, InputYear2
 df_eeb <- get_processed_eeb_data(eeb_file)
 df_eeb
 
-
+## Combine the eeb and esnon data into one large file
 df_combined <- dplyr::bind_rows(df_esnon, df_eeb) %>% 
   dplyr::full_join(df_conv_factors, by = c('product', 'unit')) %>% 
   dplyr::mutate(value_TJ = value * unit_value_in_TJ)
 
 df_combined
 
-unique(df_combined$product)
+
+## remove this files
+rm("df_conv_factors", "df_eeb", "df_esnon", "df_oed_flow", "df_oed_prod")
 
 
-
-# df_units <- df_combined %>% 
-#   dplyr::select(product, unit) %>% 
-#   dplyr::distinct() %>% 
-#   dplyr::filter(unit != 'TJ')
-# 
-# df_units
-# 
-# # write.csv(df_units, 'units_factors.csv', row.names = F)
-
-# df_units2 <- df_combined %>%
-#   dplyr::select(product, unit) %>%
-#   dplyr::distinct() %>%
-#   dplyr::filter(!unit %in% c('TJ gross', 'GWh', 'kt'))
-# 
-# df_units2
-# 
-# # write.csv(df_units2, 'units_factors2.csv', row.names = F)
-
+## Do some data exploration
 
 # Get the series in a specified range of years
 get_series <- function(InputData, InputYear1, InputYear2){
@@ -368,7 +195,7 @@ get_series <- function(InputData, InputYear1, InputYear2){
     dplyr::filter(year >= InputYear1 & year <= InputYear2,
                   # Flow == "Production",
                   stage ==  "Final consumption"
-                  ) #%>%
+                  )
   
 }
 
@@ -399,5 +226,10 @@ df %>%
   theme(legend.position = "bottom") -> plt_all
 
 plt_all
+
+
+
+
+
 
 ## The script ends here ##
